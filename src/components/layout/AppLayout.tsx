@@ -21,7 +21,7 @@ const drawerWidth = 240;
 
 
 
-export default function ResponsiveDrawer() {
+export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
 
@@ -74,7 +74,7 @@ export default function ResponsiveDrawer() {
 
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', bgcolor: (theme) => theme.palette.grey[100], minHeight: "100vh" }}>
       <CssBaseline />
 
       {/* ヘッダー */}
