@@ -13,6 +13,10 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 
 function App() {
+  // 引数がFireStoreのエラー型かどうかを判定する関数
+  function isFireStoreError(err:unknown): err is { code: string, message: string } {
+    return typeof err === 'object' && err !== null && 'code' in err && 'message' in err;
+  }
 
   const[transactions, setTransactions] = useState<Transaction[]>([]);
   
@@ -31,7 +35,11 @@ function App() {
       console.log(transactionsData)
       setTransactions(transactionsData);
     } catch(err) {
-      //error
+      if(isFireStoreError(err)) {
+        console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)
+      } else {
+        console.error("一般的なエラーは",err)
+      }
     }
     }
     fecheTransactions();
