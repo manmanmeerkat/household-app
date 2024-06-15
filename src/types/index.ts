@@ -10,3 +10,9 @@ export interface Transaction {
     type: TransactionType,
     category: imcomCategory | expenseCategory,
 }
+
+export interface Balance {
+    income: number,
+    expense: number,
+    balance: number,
+}
