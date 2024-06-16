@@ -29,7 +29,7 @@ function App() {
     const fecheTransactions = async() => {
     try {
       const querySnapshot = await getDocs(collection(db, "Transactions"))
-      
+      console.log("qu",querySnapshot)
       const transactionsData = querySnapshot.docs.map((doc) => {
         return { 
           id: doc.id,
@@ -37,8 +37,9 @@ function App() {
         } as Transaction
       });
 
-      console.log(transactionsData)
+      console.log("tra",transactionsData)
       setTransactions(transactionsData);
+      console.log("tramsa",transactions)
     } catch(err) {
       if(isFireStoreError(err)) {
         console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)
@@ -54,7 +55,8 @@ function App() {
     return transaction.date.startsWith(formatMonth(currentMonth))
   })
 
-  console.log(monthlyTransactions)
+  console.log("mon",monthlyTransactions)
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -62,7 +64,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AppLayout />}>
-          <Route index element={<Home monthlyTransactions={monthlyTransactions} />} />
+          <Route index element={<Home monthlyTransactions={monthlyTransactions} setCurrentMonth={setCurrentMonth}/>} />
           <Route path="/report" element={<Report />} />
           <Route path="*" element={<NoMatch />} />
         </Route>
