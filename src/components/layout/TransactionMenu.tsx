@@ -17,7 +17,18 @@ import NotesIcon from "@mui/icons-material/Notes";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import DailySummary from "../DailySummary";
-const TransactionMenu = () => {
+import { Transaction } from "../../types";
+import { formatCurrency } from "../../utils/formatting";
+
+interface TransactionMenuProps {
+  dailyTransactions: Transaction[];
+  currentDay: string;
+
+}
+
+const TransactionMenu = ({ dailyTransactions, currentDay }
+  : TransactionMenuProps
+) => {
   const menuDrawerWidth = 320;
   return (
     <Drawer
@@ -35,8 +46,8 @@ const TransactionMenu = () => {
       anchor={"right"}
     >
       <Stack sx={{ height: "100%" }} spacing={2}>
-        <Typography fontWeight={"fontWeightBold"}>日時： 2023-12-31</Typography>
-       <DailySummary />
+        <Typography fontWeight={"fontWeightBold"}>日時： {currentDay}</Typography>
+       <DailySummary dailyTransactions={dailyTransactions}/>
         {/* 内訳タイトル&内訳追加ボタン */}
         <Box
           sx={{
@@ -59,7 +70,8 @@ const TransactionMenu = () => {
         <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
           <List aria-label="取引履歴">
             <Stack spacing={2}>
-              <ListItem disablePadding>
+              {dailyTransactions.map((transaction) => (
+                <ListItem disablePadding>
                 <Card
                   sx={{
                     width: "100%",
@@ -85,12 +97,12 @@ const TransactionMenu = () => {
                             display="block"
                             gutterBottom
                           >
-                            食費
+                            {transaction.category}
                           </Typography>
                         </Grid>
                         <Grid item xs={4}>
                           <Typography variant="body2" gutterBottom>
-                            卵
+                            {transaction.content}
                           </Typography>
                         </Grid>
                         <Grid item xs={4.5}>
@@ -102,7 +114,7 @@ const TransactionMenu = () => {
                               wordBreak: "break-all",
                             }}
                           >
-                            ¥300
+                            ¥{formatCurrency(transaction.amount)}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -110,6 +122,8 @@ const TransactionMenu = () => {
                   </CardActionArea>
                 </Card>
               </ListItem>
+              )
+              )}
             </Stack>
           </List>
         </Box>
