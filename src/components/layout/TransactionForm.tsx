@@ -24,12 +24,13 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { watch } from "fs";
 import { ExpenseCategory, IncomeCategory } from "../../types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { transactionSchema } from "../../validations/schema";
+import { Schema, transactionSchema } from "../../validations/schema";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
+  onSaveTransaction: (transaction: Schema) => Promise<void>;
 }
 
 type IncomeExpense = "income" | "expense";
@@ -39,7 +40,7 @@ interface CategoryItem {
   icon: JSX.Element;
 }
 
-const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay}: TransactionFormProps) => {
+const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay, onSaveTransaction}: TransactionFormProps) => {
   const formWidth = 320;
 
    // 支出用カテゴリ
@@ -60,7 +61,7 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay}: Transacti
 
   const [categories, setCategories] = useState(expenseCategories);
 
-  const { control, setValue, watch, formState:{errors}, handleSubmit } = useForm(
+  const { control, setValue, watch, formState:{errors}, handleSubmit } = useForm<Schema>(
     {
       defaultValues: {
         type: "expense",
@@ -72,7 +73,6 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay}: Transacti
       resolver: zodResolver(transactionSchema),
     }
   );
-  console.log(errors);
 
 const incomeExpenseToggle = (type: IncomeExpense) => {
   setValue("type", type);
@@ -91,9 +91,10 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
       setCategories(newCategories);
     }, [currentType]);
 
-  const onSubmit: SubmitHandler<any> = (data) => {
-    console.log("data",data);
-  }
+  const onSubmit: SubmitHandler<Schema> = (data) => {
+    console.log(data);
+    onSaveTransaction(data);
+  };
   
   return (
     <Box
@@ -160,6 +161,8 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
                 InputLabelProps={{
                   shrink: true,
                 }}
+                error={!!errors.date}
+                helperText={errors.date?.message}
               />
             )}
           />
@@ -171,12 +174,14 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
             render={({field}) => (
               <TextField
                 {...field}
+                error={!!errors.category}
+                helperText={errors.category?.message}
                 id="カテゴリ"
                 label="カテゴリ"
                 select
               >
-                {categories.map((category) => (
-                <MenuItem value={category.label}>
+                {categories.map((category, index) => (
+                <MenuItem value={category.label} key={index}>
                   <ListItemIcon>
                     {category.icon}
                   </ListItemIcon>
@@ -193,6 +198,8 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
             render={({field}) => (
               <TextField
                 {...field}
+                error={!!errors.amount}
+                helperText={errors.amount?.message}
                 value={field.value === 0 ? "" : field.value}
                 onChange={(e) => {
                   const newValue = parseInt(e.target.value, 10) || 0;
@@ -210,6 +217,8 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
             render={({field}) => (
               <TextField
                 {...field}
+                error={!!errors.content}
+                helperText={errors.content?.message}
                 label="内容"
                 type="text"
               />
