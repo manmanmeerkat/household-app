@@ -23,6 +23,8 @@ import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { watch } from "fs";
 import { ExpenseCategory, IncomeCategory } from "../../types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { transactionSchema } from "../../validations/schema";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
@@ -58,7 +60,7 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay}: Transacti
 
   const [categories, setCategories] = useState(expenseCategories);
 
-  const { control, setValue, watch } = useForm(
+  const { control, setValue, watch, formState:{errors}, handleSubmit } = useForm(
     {
       defaultValues: {
         type: "expense",
@@ -67,8 +69,10 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay}: Transacti
         amount: 0,
         content: "",
       },
+      resolver: zodResolver(transactionSchema),
     }
   );
+  console.log(errors);
 
 const incomeExpenseToggle = (type: IncomeExpense) => {
   setValue("type", type);
@@ -86,6 +90,10 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
         currentType === "expense" ? expenseCategories : incomeCategories;
       setCategories(newCategories);
     }, [currentType]);
+
+  const onSubmit: SubmitHandler<any> = (data) => {
+    console.log("data",data);
+  }
   
   return (
     <Box
@@ -121,7 +129,7 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
         </IconButton>
       </Box>
       {/* フォーム要素 */}
-      <Box component={"form"}>
+      <Box component={"form"} onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
           {/* 収支切り替えボタン */}
           <Controller
@@ -185,6 +193,11 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
             render={({field}) => (
               <TextField
                 {...field}
+                value={field.value === 0 ? "" : field.value}
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value, 10) || 0;
+                  field.onChange(newValue);
+                }}
                 label="金額"
                 type="number"
               />
