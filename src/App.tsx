@@ -63,6 +63,12 @@ function App() {
     try {
       //firestoreにデータを保存
       const docRef = await addDoc(collection(db, "Transactions"), transaction);
+    
+      const newTransaction = {
+        id: docRef.id,
+        ...transaction
+      } as Transaction;
+      setTransactions((prevTransactions) => [...prevTransactions, newTransaction]);
     } catch(err) {
       if(isFireStoreError(err)) {
         console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)

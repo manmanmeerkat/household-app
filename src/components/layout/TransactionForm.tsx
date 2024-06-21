@@ -61,7 +61,7 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay, onSaveTran
 
   const [categories, setCategories] = useState(expenseCategories);
 
-  const { control, setValue, watch, formState:{errors}, handleSubmit } = useForm<Schema>(
+  const { control, setValue, watch, formState:{errors}, handleSubmit, reset } = useForm<Schema>(
     {
       defaultValues: {
         type: "expense",
@@ -76,6 +76,7 @@ const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay, onSaveTran
 
 const incomeExpenseToggle = (type: IncomeExpense) => {
   setValue("type", type);
+  setValue("category", "");
 };
   //収支タイプを監視
   const currentType = watch("type");
@@ -91,9 +92,18 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
       setCategories(newCategories);
     }, [currentType]);
 
+
+  // フォームの送信処理
   const onSubmit: SubmitHandler<Schema> = (data) => {
     console.log(data);
     onSaveTransaction(data);
+
+    reset({
+      type: currentType, 
+      date: currentDay, 
+      category: "", 
+      amount: 0, 
+      content: ""});
   };
   
   return (
