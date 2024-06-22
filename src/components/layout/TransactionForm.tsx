@@ -114,7 +114,7 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
     if (selectedTransaction) {
       onUpdateTransaction(data, selectedTransaction.id)
         .then(() => {
-          console.log("更新しました。");
+          // console.log("更新しました。");
           setSelectedTransaction(null);
          
         })

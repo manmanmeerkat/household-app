@@ -14,6 +14,7 @@ import { db } from './firebase';
 import { format } from 'date-fns';
 import { formatMonth } from './utils/formatting';
 import { Schema } from './validations/schema';
+import { T } from '@fullcalendar/core/internal-common';
 
 function App() {
   // 引数がFireStoreのエラー型かどうかを判定する関数
@@ -98,6 +99,10 @@ function App() {
       const docRef = doc(db, "Transactions", transactionId);
 
       await updateDoc(docRef, transaction);
+      //フロント更新
+      const updatedTransactions = transactions.map((t) => t.id === transactionId ? {...t, ...transaction} : t
+    ) as Transaction[];
+    setTransactions(updatedTransactions);
     } catch(err) {
       if(isFireStoreError(err)) {
         console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)
