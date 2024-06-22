@@ -22,7 +22,7 @@ import SavingsIcon from "@mui/icons-material/Savings";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { watch } from "fs";
-import { ExpenseCategory, IncomeCategory } from "../../types";
+import { ExpenseCategory, IncomeCategory, Transaction } from "../../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, transactionSchema } from "../../validations/schema";
 
@@ -31,6 +31,7 @@ interface TransactionFormProps {
   isEntryDrawerOpen: boolean;
   currentDay: string;
   onSaveTransaction: (transaction: Schema) => Promise<void>;
+  selectedTransaction: Transaction | null;
 }
 
 type IncomeExpense = "income" | "expense";
@@ -40,7 +41,13 @@ interface CategoryItem {
   icon: JSX.Element;
 }
 
-const TransactionForm = ({onCloseForm, isEntryDrawerOpen, currentDay, onSaveTransaction}: TransactionFormProps) => {
+const TransactionForm = ({
+  onCloseForm, 
+  isEntryDrawerOpen, 
+  currentDay, 
+  onSaveTransaction,
+  selectedTransaction,
+}: TransactionFormProps) => {
   const formWidth = 320;
 
    // 支出用カテゴリ
@@ -105,7 +112,25 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
       amount: 0, 
       content: ""});
   };
-  
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      setValue("type", selectedTransaction.type);
+      setValue("date", selectedTransaction.date);
+      setValue("category", selectedTransaction.category);
+      setValue("amount", selectedTransaction.amount);
+      setValue("content", selectedTransaction.content);
+    } else {
+      reset({
+        type: "expense",
+        date: currentDay,
+        category: "",
+        amount: 0,
+        content: "",
+      });
+    }
+  }, [selectedTransaction]);
+
   return (
     <Box
       sx={{
