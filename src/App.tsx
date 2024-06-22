@@ -11,7 +11,7 @@ import { CssBaseline } from '@mui/material';
 import { Transaction } from './types/index';
 import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { formatMonth } from './utils/formatting';
 import { Schema } from './validations/schema';
 import { T } from '@fullcalendar/core/internal-common';
@@ -24,6 +24,7 @@ function App() {
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fecheTransactions = async() => {
@@ -37,17 +38,17 @@ function App() {
         } as Transaction
       });
 
-      console.log("tra",transactionsData)
       setTransactions(transactionsData);
-      console.log("tramsa",transactions)
     } catch(err) {
       if(isFireStoreError(err)) {
         console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)
       } else {
         console.error("一般的なエラーは",err)
       }
+    } finally {
+      setIsLoading(false);
     }
-    }
+  };
     fecheTransactions();
   },[])
 
@@ -73,8 +74,8 @@ function App() {
         console.error("firestoreのエラーは",err.code, "firebaseのエラーメッセージは",err.message)
       } else {
         console.error("一般的なエラーは",err)
-      }
-    }
+      } 
+    } 
   }
 
   const handleDeleteTransaction = async (transactionid: string) => {
@@ -126,7 +127,16 @@ function App() {
               onDeleteTransaction={handleDeleteTransaction}
               onUpdateTransaction={handleUpdateTransaction}
               />} />
-          <Route path="/report" element={<Report />} />
+          <Route path="/report" 
+            element={
+              <Report 
+                currentMonth={currentMonth} 
+                setCurrentMonth={setCurrentMonth} 
+                monthlyTransactions={monthlyTransactions}
+                isLoading={isLoading}
+                  />
+                } 
+              />
           <Route path="*" element={<NoMatch />} />
         </Route>
       </Routes>
