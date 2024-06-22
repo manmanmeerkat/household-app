@@ -25,6 +25,7 @@ import { watch } from "fs";
 import { ExpenseCategory, IncomeCategory, Transaction } from "../../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, transactionSchema } from "../../validations/schema";
+import { el, s } from "@fullcalendar/core/internal-common";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
@@ -32,6 +33,10 @@ interface TransactionFormProps {
   currentDay: string;
   onSaveTransaction: (transaction: Schema) => Promise<void>;
   selectedTransaction: Transaction | null;
+  onDeleteTransaction: (transactionId: string) => Promise<void>;
+  setSelectedTransaction: React.Dispatch<
+    React.SetStateAction<Transaction | null>>;
+  onUpdateTransaction: (transaction: Schema, transactionId: string) => Promise<void>;
 }
 
 type IncomeExpense = "income" | "expense";
@@ -47,6 +52,9 @@ const TransactionForm = ({
   currentDay, 
   onSaveTransaction,
   selectedTransaction,
+  onDeleteTransaction,
+  setSelectedTransaction,
+  onUpdateTransaction,
 }: TransactionFormProps) => {
   const formWidth = 320;
 
@@ -100,17 +108,35 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
     }, [currentType]);
 
 
-  // フォームの送信処理
+  // 送信処理
   const onSubmit: SubmitHandler<Schema> = (data) => {
     console.log(data);
-    onSaveTransaction(data);
-
+    if (selectedTransaction) {
+      onUpdateTransaction(data, selectedTransaction.id)
+        .then(() => {
+          console.log("更新しました。");
+          setSelectedTransaction(null);
+         
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      onSaveTransaction(data)
+        .then(() => {
+          console.log("保存しました。");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
     reset({
-      type: currentType, 
-      date: currentDay, 
-      category: "", 
-      amount: 0, 
-      content: ""});
+      type: "expense",
+      date: currentDay,
+      amount: 0,
+      category: "",
+      content: "",
+    });
   };
 
   useEffect(() => {
@@ -130,6 +156,13 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
       });
     }
   }, [selectedTransaction]);
+
+  const handleDelete = () => {
+    if (selectedTransaction){
+    onDeleteTransaction(selectedTransaction.id);
+    setSelectedTransaction(null);
+    }
+  }
 
   return (
     <Box
@@ -261,8 +294,14 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
           />
           {/* 保存ボタン */}
           <Button type="submit" variant="contained" color={currentType === "income" ? "primary" : "error"} fullWidth>
-            保存
+           {selectedTransaction ? "更新" : "保存"}
           </Button>
+          {/* 削除ボタン */}
+          {selectedTransaction && (
+           <Button onClick={handleDelete} variant="outlined" color={"secondary"} fullWidth>
+            削除
+          </Button> 
+          )}
         </Stack>
       </Box>
     </Box>
