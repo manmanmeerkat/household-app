@@ -140,10 +140,18 @@ const incomeExpenseToggle = (type: IncomeExpense) => {
   };
 
   useEffect(() => {
+    if(selectedTransaction) {
+    const categoryExists = categories.some(
+      (category) => category.label === selectedTransaction?.category
+    );
+    setValue("category", categoryExists ? selectedTransaction.category : "");
+  }
+  }, [selectedTransaction, categories]);
+
+  useEffect(() => {
     if (selectedTransaction) {
       setValue("type", selectedTransaction.type);
       setValue("date", selectedTransaction.date);
-      setValue("category", selectedTransaction.category);
       setValue("amount", selectedTransaction.amount);
       setValue("content", selectedTransaction.content);
     } else {
